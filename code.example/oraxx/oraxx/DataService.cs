@@ -9,11 +9,13 @@ namespace oraxx
 	internal sealed class DataService
 	{
 		private System.Data.IDbConnection _connection = null;
+	
 		private System.Data.IDataReader _reader = null; 
 
 		public DataService()
 		{
-
+			this.Execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
+			this.Execute("ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'YYYY-MM-DD HH24:MI:SS.XFF'");
 		}
 
 		private System.Data.IDbConnection Connect()
