@@ -11,12 +11,13 @@ namespace oraxx
 	{
 		public static void Main(string[] args)
 		{
-			DataService s = new DataService();
+			DataService s = null;
 
 	
 			
 			try
 			{
+				s = new DataService();
 				System.Data.IDataReader reader = s.Query("SELECT CURRENT_TIMESTAMP FROM DUAL");
 				while (reader.Read())
 				{
