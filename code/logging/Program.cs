@@ -50,14 +50,14 @@ namespace logging
 			Console.WriteLine(line);
 
 			// ファイルに文字列を出力します。
-			System.IO.TextWriter writer = new System.IO.StreamWriter(GetTempPath(), true);
+			System.IO.TextWriter writer = new System.IO.StreamWriter(GetApplicationLogPath(), true);
 			writer.WriteLine(line);
 			writer.Close();
 		}
 
 		private static string _path = "";
 
-		private static string GetTempPath()
+		private static string GetApplicationLogPath()
 		{
 			if (_path != null && _path != "")
 			{
