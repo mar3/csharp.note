@@ -88,6 +88,15 @@ namespace ZipArchiver
 			}
 		}
 
+		/// <summary>
+		/// ZIP 内のパスを生成します。
+		/// 
+		/// 先頭に '/' はありません。
+		/// パス区切りは OS 依存ではなく、必ず '/' のようです。
+		/// </summary>
+		/// <param name="parent">上位のフォルダー</param>
+		/// <param name="name">エントリー(=ファイル・フォルダー)の名前</param>
+		/// <returns>パス</returns>
 		private static string BuildPath(string parent, string name)
 		{
 			return parent == "" ? name : parent + "/" + name;
@@ -117,11 +126,19 @@ namespace ZipArchiver
 			}
 		}
 
+		/// <summary>
+		/// 日付文字列を返します。
+		/// </summary>
+		/// <returns></returns>
 		private static string GetDateString()
 		{
 			return DateTime.Now.ToString("yyyyMMdd-HHmmss");
 		}
 
+		/// <summary>
+		/// タイムスタンプ文字列を返します。
+		/// </summary>
+		/// <returns></returns>
 		private static string GetCurrentTimestamp()
 		{
 			DateTime now = DateTime.Now;

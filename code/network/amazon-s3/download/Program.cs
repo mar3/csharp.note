@@ -8,6 +8,8 @@ namespace download
 		{
 			try
 			{
+				ListBucketsFromAmazonS3();
+
 				EnumerateObject3("バケット名");
 			}
 			catch (Exception e)
@@ -18,9 +20,34 @@ namespace download
 			}
 		}
 
+		/// <summary>
+		/// バケットを列挙します。
+		/// </summary>
+		private static void ListBucketsFromAmazonS3()
+		{
+			var accessKeyId = "" + System.Configuration.ConfigurationManager.AppSettings["aws_access_key_id"];
+			var secretAccessKey = "" + System.Configuration.ConfigurationManager.AppSettings["aws_secret_access_key"];
+
+			var s3 = new Amazon.S3.AmazonS3Client(
+				accessKeyId,
+				secretAccessKey,
+				Amazon.RegionEndpoint.APNortheast1);
+
+			var buckets = s3.ListBucketsAsync();
+
+			foreach (var b in buckets.Result.Buckets)
+			{
+				Console.WriteLine("[TRACE] bucket: [{0}]", b.BucketName);
+			}
+		}
+
+		/// <summary>
+		/// 特定バケット内のオブジェクトを列挙します。
+		/// </summary>
+		/// <param name="bucketName">バケット</param>
 		private static void EnumerateObject3(string bucketName)
 		{
-			var client  = new Amazon.S3.AmazonS3Client(Amazon.RegionEndpoint.APNortheast1);
+			var client = new Amazon.S3.AmazonS3Client(Amazon.RegionEndpoint.APNortheast1);
 
 			string key = "";
 
