@@ -16,16 +16,26 @@ namespace download
 			try
 			{
 				Console.WriteLine("[TRACE] ### START ###");
-				Console.WriteLine("[TRACE] バケットを列挙しています...");
-				ListBucketsFromAmazonS3();
-				Console.WriteLine();
 
-				Console.WriteLine("[TRACE] バケット内のエントリーを列挙しています...");
-				EnumerateObject3("バケット名");
-				Console.WriteLine();
+				// ========== バケットを列挙 ==========
+				{
+					Console.WriteLine("[TRACE] バケットを列挙しています...");
+					ListBucketsFromAmazonS3();
+					Console.WriteLine();
+				}
 
-				DownloadDirectory("バケット名", "パス");
-				Console.WriteLine();
+				// ========== バケット内のエントリーを列挙 ==========
+				{
+					Console.WriteLine("[TRACE] バケット内のエントリーを列挙しています...");
+					EnumerateObject3("バケット名");
+					Console.WriteLine();
+				}
+
+				// ========== バケット内のエントリーをダウンロード ==========
+				{
+					DownloadDirectory("バケット名", "パス", "tmp");
+					Console.WriteLine();
+				}
 
 				Console.WriteLine("[TRACE] --- END ---");
 			}
@@ -65,7 +75,7 @@ namespace download
 		{
 			var conf = new Configuration();
 
-			var client = new Amazon.S3.AmazonS3Client(
+			var s3 = new Amazon.S3.AmazonS3Client(
 				conf.AccessKeyId,
 				conf.SecretAccessKey,
 				Amazon.RegionEndpoint.APNortheast1);
@@ -82,7 +92,7 @@ namespace download
 					request.ContinuationToken = key;
 				}
 
-				using (var response = client.ListObjectsV2Async(request))
+				using (var response = s3.ListObjectsV2Async(request))
 				{
 					var result = response.Result;
 					foreach (var e in result.S3Objects)
@@ -105,16 +115,64 @@ namespace download
 			}
 		}
 
-		private static void DownloadDirectory(string bucketName, string path)
+		private static void DownloadDirectory(string bucketName, string path, string localLocation)
 		{
+			var conf = new Configuration();
 
+			var s3 = new Amazon.S3.AmazonS3Client(
+				conf.AccessKeyId,
+				conf.SecretAccessKey,
+				Amazon.RegionEndpoint.APNortheast1);
+
+			string key = "";
+
+			while (true)
+			{
+				var request = new Amazon.S3.Model.ListObjectsV2Request { BucketName = bucketName, Prefix = "" };
+
+				if (key != "")
+				{
+					// 次のページ
+					request.ContinuationToken = key;
+				}
+
+				using (var response = s3.ListObjectsV2Async(request))
+				{
+					var result = response.Result;
+					foreach (var e in result.S3Objects)
+					{
+						Console.WriteLine("[TRACE] S3 Object: " + e.Key + " (Truncated: " + result.IsTruncated + ")");
+					}
+
+					// 次のページの有無を判断
+					if (!result.IsTruncated)
+					{
+						break;
+					}
+					key = "" + result.ContinuationToken;
+					if (key == "")
+					{
+						break;
+					}
+					Console.WriteLine("[TRACE] 次のページ: [" + key + "]");
+				}
+			}
 		}
 	}
 
+	/// <summary>
+	/// コンフィギュレーションクラス
+	/// </summary>
 	internal sealed class Configuration
 	{
+		/// <summary>
+		/// ACCESS_KEY_ID
+		/// </summary>
 		private string accessKeyId = "";
 
+		/// <summary>
+		/// SECRET_ACCESS_KEY
+		/// </summary>
 		private string secretAccessKey = "";
 
 		/// <summary>
@@ -160,6 +218,9 @@ namespace download
 			return string.IsNullOrEmpty(left) ? right : left;
 		}
 
+		/// <summary>
+		/// ACCESS_KEY_ID
+		/// </summary>
 		public string AccessKeyId
 		{
 			get
@@ -168,6 +229,9 @@ namespace download
 			}
 		}
 
+		/// <summary>
+		/// SECRET_ACCESS_KEY
+		/// </summary>
 		public string SecretAccessKey
 		{
 			get
