@@ -2,8 +2,15 @@
 
 namespace download
 {
-	class Program
+	/// <summary>
+	/// アプリケーション本体
+	/// </summary>
+	internal sealed class Program
 	{
+		/// <summary>
+		/// アプリケーションのエントリーポイント
+		/// </summary>
+		/// <param name="args">コマンドライン引数</param>
 		static void Main(string[] args)
 		{
 			try
