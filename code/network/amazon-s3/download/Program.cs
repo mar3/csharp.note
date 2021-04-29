@@ -115,6 +115,12 @@ namespace download
 			}
 		}
 
+		/// <summary>
+		/// コンテンツをダウンロードします。
+		/// </summary>
+		/// <param name="bucketName">S3 バケットの名前</param>
+		/// <param name="path"></param>
+		/// <param name="localLocation"></param>
 		private static void DownloadDirectory(string bucketName, string path, string localLocation)
 		{
 			var conf = new Configuration();
@@ -141,6 +147,10 @@ namespace download
 					var result = response.Result;
 					foreach (var e in result.S3Objects)
 					{
+						var gor = new Amazon.S3.Model.GetObjectRequest();
+						gor.BucketName = "";
+						gor.Key = "";
+						var res = s3.GetObjectAsync(gor).Result;
 						Console.WriteLine("[TRACE] S3 Object: " + e.Key + " (Truncated: " + result.IsTruncated + ")");
 					}
 
