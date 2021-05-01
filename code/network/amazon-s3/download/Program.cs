@@ -11,11 +11,15 @@ namespace download
 		/// アプリケーションのエントリーポイント
 		/// </summary>
 		/// <param name="args">コマンドライン引数</param>
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
 			try
 			{
 				Console.WriteLine("[TRACE] ### START ###");
+
+				// ========== コンフィギュレーション ==========
+				var conf = Configuration.GetInstance();
+				conf.Configure(args);
 
 				// ========== バケットを列挙 ==========
 				{
@@ -52,7 +56,7 @@ namespace download
 		/// </summary>
 		private static void ListBucketsFromAmazonS3()
 		{
-			var conf = new Configuration();
+			var conf = Configuration.GetInstance();
 
 			using var s3 = new Amazon.S3.AmazonS3Client(
 				conf.AccessKeyId,
@@ -140,7 +144,7 @@ namespace download
 		{
 			try
 			{
-				var conf = new Configuration();
+				var conf = Configuration.GetInstance();
 
 				var s3 = new Amazon.S3.AmazonS3Client(
 					conf.AccessKeyId,
@@ -230,87 +234,6 @@ namespace download
 		{
 			if (key == "") return key;
 			return key.Substring(0, key.Length - 1);
-		}
-	}
-
-	/// <summary>
-	/// コンフィギュレーションクラス
-	/// </summary>
-	internal sealed class Configuration
-	{
-		/// <summary>
-		/// ACCESS_KEY_ID
-		/// </summary>
-		private string accessKeyId = "";
-
-		/// <summary>
-		/// SECRET_ACCESS_KEY
-		/// </summary>
-		private string secretAccessKey = "";
-
-		/// <summary>
-		/// コンストラクター
-		/// </summary>
-		public Configuration()
-		{
-			// 既定のコンフィギュレーション
-			this.Configure();
-			// 環境変数によるコンフィギュレーションの書き換え
-			this.ConfigureFromEnv();
-		}
-
-		/// <summary>
-		/// コンフィギュレーション
-		/// </summary>
-		private void Configure()
-		{
-			this.accessKeyId = "" + System.Configuration.ConfigurationManager.AppSettings["aws_access_key_id"];
-			this.secretAccessKey = "" + System.Configuration.ConfigurationManager.AppSettings["aws_secret_access_key"];
-		}
-
-		/// <summary>
-		/// 環境変数によるコンフィギュレーションの書き換え
-		/// </summary>
-		private void ConfigureFromEnv()
-		{
-			// 環境変数による設定を検出したら、値が上書きされます。
-			this.accessKeyId = SelectValid(
-				Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID"), this.accessKeyId);
-			this.secretAccessKey = SelectValid(
-				Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY"), this.secretAccessKey);
-		}
-
-		/// <summary>
-		/// 有効な値の選択(left 優先)
-		/// </summary>
-		/// <param name="left"></param>
-		/// <param name="right"></param>
-		/// <returns></returns>
-		private static string SelectValid(string left, string right)
-		{
-			return string.IsNullOrEmpty(left) ? right : left;
-		}
-
-		/// <summary>
-		/// ACCESS_KEY_ID
-		/// </summary>
-		public string AccessKeyId
-		{
-			get
-			{
-				return "" + this.accessKeyId;
-			}
-		}
-
-		/// <summary>
-		/// SECRET_ACCESS_KEY
-		/// </summary>
-		public string SecretAccessKey
-		{
-			get
-			{
-				return "" + this.secretAccessKey;
-			}
 		}
 	}
 }
