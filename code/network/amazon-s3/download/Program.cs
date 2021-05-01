@@ -63,9 +63,9 @@ namespace download
 			using var s3 = new Amazon.S3.AmazonS3Client(
 				accessKeyId, secretAccessKey, regionEndPoint);
 
-			var buckets = s3.ListBucketsAsync();
-
-			foreach (var b in buckets.Result.Buckets)
+			using var listBucketRequest = s3.ListBucketsAsync();
+			var buckets = listBucketRequest.Result;
+			foreach (var b in buckets.Buckets)
 			{
 				Console.WriteLine("[TRACE] bucket: [{0}]", b.BucketName);
 			}
@@ -100,8 +100,8 @@ namespace download
 						request.ContinuationToken = token;
 					}
 
-					using var response = s3.ListObjectsV2Async(request);
-					var result = response.Result;
+					using var listObjectsResponse = s3.ListObjectsV2Async(request);
+					var result = listObjectsResponse.Result;
 					foreach (var e in result.S3Objects)
 					{
 						Console.WriteLine("[TRACE] S3 Object: " + e.Key + " (Truncated: " + result.IsTruncated + ")");
@@ -146,7 +146,7 @@ namespace download
 			// TODO もっとシンプルに
 			try
 			{
-				Console.WriteLine("[TRACE] オブジェクトをダウンロードしています... [" + localLocation + "]");
+				Console.WriteLine("[TRACE] オブジェクトをダウンロードしています... [" + bucketName + "/" + key + "] >> [" + localLocation + "]");
 
 				var s3 = new Amazon.S3.AmazonS3Client(accessKeyId, secretAccessKey, regionEndPoint);
 
@@ -155,7 +155,6 @@ namespace download
 				while (true)
 				{
 					var request = new Amazon.S3.Model.ListObjectsV2Request { BucketName = bucketName, Prefix = "" + key };
-
 					if (token != "")
 					{
 						// 次のページ
