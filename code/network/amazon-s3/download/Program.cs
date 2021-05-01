@@ -176,31 +176,41 @@ namespace download
 						if (!e.Key.StartsWith(key))
 							throw new Exception("Key が不正です。");
 
-						var relativePath = e.Key.Substring(key.Length);
-
-						Console.WriteLine("[TRACE] FOUND ENTRY [" + e.Key + "] (" + relativePath + ")");
-
-						if (e.Key.EndsWith("/"))
+						if (e.Key.EndsWith("/")) // application/x-directory
 						{
-							// Must be application/x-directory
-							var relativeKey = e.Key.Substring(key.Length).Replace('/', System.IO.Path.DirectorySeparatorChar);
+							// パス体系を変更
+							var relativeKey = e.Key.Substring(key.Length);
 							relativeKey = Util.RemoveTailSlash(relativeKey);
+							relativeKey = relativeKey.Replace('/', System.IO.Path.DirectorySeparatorChar);
+
+							// ローカルパスを生成
 							var localPathName = Util.MakePath(localLocation, relativeKey);
 							System.IO.Directory.CreateDirectory(localPathName);
-							Console.WriteLine("[TRACE] CREATE DIRECTORY... [" + e.BucketName + "/" + e.Key + "] (" + res.Headers.ContentType + ")\n");
-							Console.WriteLine("    >> [" + localPathName + "] (Truncated: " + result.IsTruncated + ")");
+
+							Console.Write("[TRACE] create [" + e.Key + "]");
+							Console.Write(" >> [" + localPathName + "]");
+							Console.Write(" (ContentType: " + res.Headers.ContentType + "");
+							Console.Write(", Truncated: " + result.IsTruncated + ")");
 							Console.WriteLine();
 						}
-						else
+						else // ファイル
 						{
-							// Something else
-							var relativeKey = e.Key.Substring(key.Length).Replace('/', System.IO.Path.DirectorySeparatorChar);
+							// パス体系を変更
+							var relativeKey = e.Key.Substring(key.Length);
+							relativeKey = relativeKey.Replace('/', System.IO.Path.DirectorySeparatorChar);
+
+							// ローカルパスを生成
 							var localPathName = Util.MakePath(localLocation, relativeKey);
+
+							// ファイルをダウンロード
 							Util.CreateParentDirectory(localPathName);
 							System.Threading.CancellationToken cancellationToken;
 							res.WriteResponseStreamToFileAsync(localPathName, false, cancellationToken).Wait();
-							Console.WriteLine("[TRACE] DOWNLOADING FILE... [" + e.BucketName + "/" + e.Key + "] (" + res.Headers.ContentType + ")");
-							Console.WriteLine("    >> [" + localPathName + "] (Truncated: " + result.IsTruncated + ")");
+
+							Console.Write("[TRACE] downloading [" + e.Key + "]");
+							Console.Write(" >> [" + localPathName + "]");
+							Console.Write(" (ContentType: " + res.Headers.ContentType + "");
+							Console.Write(", Truncated: " + result.IsTruncated + ")");
 							Console.WriteLine();
 						}
 					}

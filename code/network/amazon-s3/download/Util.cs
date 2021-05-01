@@ -44,6 +44,12 @@ namespace download
 				return key;
 			}
 
+			if (key.EndsWith("\\"))
+			{
+				Chop(ref key);
+				return key;
+			}
+
 			return key;
 		}
 
@@ -95,6 +101,9 @@ namespace download
 			// 先頭がパス区切り文字で始まっている場合は取り除く
 			while (right.StartsWith(System.IO.Path.DirectorySeparatorChar))
 				ChopHead(ref right);
+
+			if (string.IsNullOrEmpty(right))
+				return left;
 
 			return TerminatePath(left) + right;
 		}
