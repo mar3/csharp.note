@@ -4,3 +4,4 @@
 @SET AWS_SECRET_ACCESS_KEY=xXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX
 
 @CALL bin\Release\netcoreapp3.1\download.exe
+@CALL bin\Release\netcoreapp3.1\download.exe "%SRC%" "%DEST%"
