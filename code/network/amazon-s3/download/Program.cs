@@ -143,6 +143,7 @@ namespace download
 			string accessKeyId, string secretAccessKey, Amazon.RegionEndpoint regionEndPoint,
 			string bucketName, string key, string localLocation)
 		{
+			// TODO もっとシンプルに
 			try
 			{
 				Console.WriteLine("[TRACE] オブジェクトをダウンロードしています... [" + localLocation + "]");
